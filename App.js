@@ -1,20 +1,54 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React from 'react';
+import 'react-native-gesture-handler';
 
-export default function App() {
+//NAVIGATION
+import { NavigationContainer } from '@react-navigation/native';
+import { createDrawerNavigator} from '@react-navigation/drawer';
+//Custom Components
+import { CustomDrawer} from './components/navigation/drawer'
+
+import ManageTopics from './components/screens/manageTopics';
+import FlashCardsScreen from './components/screens/flashCards';
+import Settings from './components/screens/settings'
+//const Stack = createNativeStackNavigator();
+const Drawer = createDrawerNavigator();
+
+navigationScreenOptions={
+  headerShown: true,
+  headerStyle: {
+    backgroundColor: '#000000',
+    borderBottomWidth: '0',
+    elevation: 0, // remove shadow on Android
+    shadowOpacity: 0, // remove shadow on iOS
+  },
+  headerTitleStyle: {
+    color: 'white'
+  },
+  drawerActiveBackgroundColor: '#0f0082',
+  drawerActiveTintColor: '#fff',
+  drawerInactiveTintColor: '#fff',
+  drawerLabelStyle: {
+    fontSize: 15,
+  },
+}
+
+export default function App(){
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <NavigationContainer>
+      
+      <Drawer.Navigator  drawerContent={props => <CustomDrawer {...props} />}
+      screenOptions={navigationScreenOptions} initialRouteName="Topics"> 
+        <Drawer.Screen name="Topics" component={ManageTopics} />
+        <Drawer.Screen name="Flash Cards" component={FlashCardsScreen} />
+        <Drawer.Screen name = "Settings" component={Settings} />
+      </Drawer.Navigator>
+    </NavigationContainer>
+    
+    
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+/*<Tab.Navigator tabBar={(props) => <MyTabBar {...props} initialRouteName = "Login"/>}>
+        <Tab.Screen name = "Login" component={Login} />
+        <Tab.Screen name="Register" component={Register} />   
+       </Tab.Navigator>*/
