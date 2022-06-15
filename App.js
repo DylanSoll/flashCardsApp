@@ -35,13 +35,12 @@ navigationScreenOptions={
 export default function App(){
   return (
     <NavigationContainer>
-      
-      <Drawer.Navigator  drawerContent={props => <CustomDrawer {...props} />}
-      screenOptions={navigationScreenOptions} initialRouteName="Topics"> 
-        <Drawer.Screen name="Topics" component={ManageTopics} />
-        <Drawer.Screen name="Flash Cards" component={FlashCardsScreen} />
-        <Drawer.Screen name = "Settings" component={Settings} />
-      </Drawer.Navigator>
+        <Drawer.Navigator  drawerContent={props => <CustomDrawer {...props} />}
+        screenOptions={navigationScreenOptions} initialRouteName="Topics"> 
+          <Drawer.Screen name="Topics" component={ManageTopics} />
+          <Drawer.Screen name="Flash Cards" component={FlashCardsScreen} />
+          <Drawer.Screen name = "Settings" component={Settings} />
+        </Drawer.Navigator>
     </NavigationContainer>
     
     

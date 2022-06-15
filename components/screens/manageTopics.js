@@ -2,8 +2,8 @@ import React from 'react'
 import { StyleSheet, Text, View, Modal, SafeAreaView, FlatList, Keyboard, KeyboardAvoidingView,
   TextInput, Button, Dimensions, TouchableWithoutFeedback } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-export default function ManageTopics(){
+//<Drawer.Screen name="Flash Cards" component={FlashCardsScreen} />
+export default function ManageTopics({navigation}){
   
   const [currentFlashCardData, updateCurrentFlashCardData] = React.useState(undefined)
   const [showNewTopic, updateTopic] = React.useState(false);
@@ -11,7 +11,7 @@ export default function ManageTopics(){
   const [newTopicDescription, updateNewTopicDescription] = React.useState('');
   const [validName, updateValidName] = React.useState('grey');
   const [canCreate, updateCanCreate] = React.useState(false);
-  
+
   const updateTopicsFromMemory = async () => {
     try {
       const keys = await AsyncStorage.getAllKeys();
@@ -72,6 +72,7 @@ export default function ManageTopics(){
       flex:1,
       backgroundColor: 'black'
     }}>
+        
         <Modal visible = {showNewTopic} >
           <TouchableWithoutFeedback  onPress = {Keyboard.dismiss}>
 
@@ -118,7 +119,15 @@ export default function ManageTopics(){
                 <Text style={{color:'white', textAlign: 'center', fontSize: 20}}>{item.flashCards.length} Flash Cards</Text>
                 <View style={{flexDirection: 'row', alignSelf: 'center'}}>
                   <Button title='Edit' onPress={()=>{alert('editing')}}/>
-                  <Button title='Test' onPress={()=>{alert('Testing')}}/>
+                  <Button title='Test' onPress={()=>{
+                    window.currentCards = item.topic;
+                    const convertToEditing = () =>{
+                      updateShowEditings(true)
+                    }
+                    window.flashCards = []//item.flashCards;
+                    
+                    navigation.navigate('Flash Cards')
+                    }}/>
                 </View>
               </View>
               </TouchableWithoutFeedback>
@@ -135,3 +144,5 @@ const styles = StyleSheet.create({
     backgroundColor: 'grey', width: '90%', fontSize: 30, margin: 5, borderRadius: 10, padding: 3 
   },
 });
+
+          
