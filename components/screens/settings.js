@@ -17,6 +17,7 @@ export default function Settings(){
       flex:1,
       backgroundColor: 'black'
     }}>
+      <Text style={{color:'white', fontSize: 25}}>SETTINGS</Text>
         <Button title='Clear All Data' onPress={clearSettings} />
     </SafeAreaView>
   );

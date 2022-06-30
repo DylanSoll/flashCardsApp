@@ -1,6 +1,6 @@
 import React from 'react'
 import { StyleSheet, Text, View, TextInput, Button, SafeAreaView, Dimensions,
-     TouchableWithoutFeedback, Modal, FlatList} from 'react-native';
+     TouchableWithoutFeedback, Modal, FlatList, KeyboardAvoidingView} from 'react-native';
 
      import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -15,34 +15,51 @@ export default function FlashCardsScreen({navigation}){
     if (allFlashCards.length === 1){
         toggleForwardAllowed = false;
     }
+    let initialQuestionType = undefined;
+    let initialQuestionText = undefined;
+    try{
+        initialQuestionType = currentFlashCard.questionData.type;
+        initialQuestionText = currentFlashCard.questionData.text;
+    }catch{
+        //
+    }
     
+    
+
+    console.log(allFlashCards[0])
     const [canToggleBack, changeToggleBackStatus] = React.useState(false);
     const [cancanToggleForward, changeCanToggleForwardStatus] = React.useState(toggleForwardAllowed);
     const [currentFlashCardPostion, updateCurrentFlashCardPostion] = React.useState(0);
     const [currentFlashCard, updateCurrentFlashCard] = React.useState(allFlashCards[0]);
-    const [currentlyShowingType, updateCurrentlyShowingType] = React.useState(currentFlashCard.questionData.type);
-    const [currentlyShowingText, updateCurrentlyShowingText] = React.useState(currentFlashCard.questionData.text);
+    const [currentlyShowingType, updateCurrentlyShowingType] = React.useState(initialQuestionType);
+    const [currentlyShowingText, updateCurrentlyShowingText] = React.useState(initialQuestionText);
     const [allowNewCard, updateAllowNewCard] = React.useState(true)
-    const [showEditing, updateShowEditings] = React.useState(true)
-    const addNewCard = () => {
-        alert('adding new card to here')
-    }
-    const [flashCardsInEditing, updateEditing] = React.useState(undefined)
+    const [showEditing, updateShowEditings] = React.useState(false)
 
+    const [flashCardsInEditing, updateEditing] = React.useState(undefined)
+    const checkToCreateNew = () => {
+        updateAllowNewCard(flashCardsInEditing.every(element => {
+            console.log(element.questionData.text)
+            console.log(element.answerData.text)
+            if (element.questionData.text.length === 0) return false
+            if (element.answerData.text.length === 0) return false
+            return true
+        }));
+        
+    }
     const updateTopicsFromMemory = async () => {
         try {
-        const resultData = JSON.parse(await AsyncStorage.getItem(window.currentCards));
-        const result = resultData.flashCards;
-        
-        if (result !== undefined){
-            updateEditing(result)
-        }else{
-            updateEditing([])
-        }
-        
-        return 
+            const resultData = JSON.parse(await AsyncStorage.getItem(window.currentCards));
+            const result = resultData.flashCards;
+            
+            if (result !== undefined){
+                updateEditing(result)
+            }else{
+                updateEditing([])
+            }
+         
         } catch (error) {
-        console.error(error)
+            console.error(error)
         }
     };
     try{
@@ -60,6 +77,7 @@ export default function FlashCardsScreen({navigation}){
         }else{
             updateCurrentFlashCardPostion(currentFlashCardPostion + 1);
         }
+        console.log(currentFlashCard)
         updateCurrentFlashCard(allFlashCards[currentFlashCardPostion + 1]);
         updateCurrentlyShowingType('Question');
         updateCurrentlyShowingText(allFlashCards[currentFlashCardPostion + 1].questionData.text);
@@ -79,7 +97,25 @@ export default function FlashCardsScreen({navigation}){
         updateCurrentlyShowingText(allFlashCards[currentFlashCardPostion - 1].questionData.text);
         changeCanToggleForwardStatus(true);
     }
-    
+    if (currentFlashCard === undefined){
+        return (
+            <SafeAreaView style={{backgroundColor:'black', height: '100%', justifyContent: 'center'}}>
+                <TouchableOpacity onPress = {()=>{
+                    navigation.navigate('Topics')
+                }} style= {{
+                    backgroundColor: 'red',
+                    borderRadius: 20,
+                    padding: 8,
+                    alignSelf: 'center'
+                }}>
+                    <Text style={{color: 'white', fontSize: 25, textAlign: 'center'}}>
+                        Return To Topics
+                    </Text>
+                </TouchableOpacity>
+            </SafeAreaView>
+            )
+    }
+
     return (
         <SafeAreaView style={{backgroundColor:'black', height: '100%'}}>
             <Modal visible = {showEditing} >
@@ -102,17 +138,31 @@ export default function FlashCardsScreen({navigation}){
                             <Text style={{textAlign:'center', color: 'white', fontSize: 25}}>Reset</Text>
                         </TouchableOpacity>
                     </View>
+                    <KeyboardAvoidingView behavior=''>
+
+                    
                 <FlatList data = {flashCardsInEditing} extraData = {flashCardsInEditing} renderItem = {
                     ({item, index}) => {return (
                         
                         <View style={styles.flashCard}>
                             <Text style={{color:'white', textAlign: 'center', fontSize: 30}}>Question</Text>
-                            <TextInput style={styles.input} multiline={true} placeholder="Question..." value={item.questionData.text}/>
+                            <TextInput style={styles.input} multiline={true} placeholder={item.questionData.text}
+                            onChangeText={text=>{
+                                flashCardsInEditing[index].questionData.text = text;
+                                updateEditing(flashCardsInEditing)
+                                checkToCreateNew()
+                            }}/>
                             <Text style={{color:'white', textAlign: 'center', fontSize: 30}}>Answer</Text>
-                            <TextInput style={styles.input} multiline={true} placeholder="Answer..." value={item.answerData.text}/>
+                            <TextInput style={styles.input} multiline={true} placeholder={item.answerData.text}
+                            onChangeText={text=>{
+                                flashCardsInEditing[index].answerData.text = text;
+                                updateEditing(flashCardsInEditing);
+                                checkToCreateNew();
+                            }}/>
                         </View>
               
             )} }/>
+            </KeyboardAvoidingView>
                     <TouchableOpacity onPress={()=>{
                         let currentCardsInEditing = flashCardsInEditing;
 
@@ -120,7 +170,6 @@ export default function FlashCardsScreen({navigation}){
                             'questionData': {'type':'Questiom', 'text': ''}, 
                             'answerData': {'type':'Answer', 'text': ''}
                         });
-                        console.log(flashCardsInEditing.length)
                         updateEditing(currentCardsInEditing);
                     }}
                     style={{backgroundColor: '#4d82ff', borderRadius: 15, padding: 5, width: '40%', alignSelf: 'center'}}
@@ -145,13 +194,13 @@ export default function FlashCardsScreen({navigation}){
                     }
 
                     }}>
-                    <View style={styles.flashCard}>
-                    <Text style={{textAlign: 'center', fontSize: 30, color: 'white'}}>{currentlyShowingType}</Text>
-                    <View style= {{ justifyContent: 'center', alignItems: 'center', 'flex':1}}>
-                        <Text style={{textAlign: 'center', fontSize: 20, color: 'white'}}>{currentlyShowingText}</Text>
+                        <View style={styles.flashCard}>
+                            <Text style={{textAlign: 'center', fontSize: 30, color: 'white'}}>{currentlyShowingType}</Text>
+                            <View style= {{ justifyContent: 'center', alignItems: 'center', 'flex':1}}>
+                                <Text style={{textAlign: 'center', fontSize: 20, color: 'white'}}>{currentlyShowingText}</Text>
 
-                    </View>
-                    </View>
+                            </View>
+                        </View>
                     </TouchableWithoutFeedback>
                 <Button title='>' disabled= {! cancanToggleForward} onPress = {moveCardForward}/>
             </View>

@@ -110,7 +110,13 @@ export default function ManageTopics({navigation}){
         <Button title = {"New Topic"} onPress = {()=>{updateTopic(true)}} />
           <FlatList data = {currentFlashCardData} extraData = {currentFlashCardData} renderItem = {
             ({item, index}) => {return (
-              <TouchableWithoutFeedback onPress = {()=>{alert('open')}}>
+              <TouchableWithoutFeedback onPress = {()=>{
+                  window.currentCards = item.topic;
+
+                  window.flashCards = []//item.flashCards;
+                  
+                  navigation.navigate('Flash Cards')
+                }}>
               <View style={{backgroundColor: '#2e2e2e', marginBottom: 15,
               paddingTop: 10,borderRadius: 15, width: Dimensions.get('window').width * 0.7}}
               >
@@ -118,16 +124,7 @@ export default function ManageTopics({navigation}){
                 <Text style={{color:'white', textAlign: 'center', fontSize: 20}}>{item.description}</Text>
                 <Text style={{color:'white', textAlign: 'center', fontSize: 20}}>{item.flashCards.length} Flash Cards</Text>
                 <View style={{flexDirection: 'row', alignSelf: 'center'}}>
-                  <Button title='Edit' onPress={()=>{alert('editing')}}/>
-                  <Button title='Test' onPress={()=>{
-                    window.currentCards = item.topic;
-                    const convertToEditing = () =>{
-                      updateShowEditings(true)
-                    }
-                    window.flashCards = []//item.flashCards;
-                    
-                    navigation.navigate('Flash Cards')
-                    }}/>
+                  <Button title='Delete' onPress={()=>{alert('Deleting')}}/>
                 </View>
               </View>
               </TouchableWithoutFeedback>
